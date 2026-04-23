@@ -1,0 +1,30 @@
+import tkinter as tk, requests, json, os
+
+file="fav.json"; fav=[]
+
+def load():
+    global fav
+    if os.path.exists(file): fav=json.load(open(file))
+
+def save(): json.dump(fav,open(file,"w"),indent=4)
+
+def search():
+    u=e.get()
+    if not u: return
+    r=requests.get(f"https://api.github.com/users/{u}")
+    if r.status_code==200:
+        d=r.json()
+        lb.insert(tk.END,d["login"])
+
+def add():
+    sel=lb.get(tk.ACTIVE)
+    if sel: fav.append(sel)
+
+root=tk.Tk()
+e=tk.Entry(root); e.pack()
+tk.Button(root,text="Поиск",command=search).pack()
+lb=tk.Listbox(root); lb.pack()
+tk.Button(root,text="В избранное",command=add).pack()
+
+root.protocol("WM_DELETE_WINDOW",lambda:(save(),root.destroy()))
+load(); root.mainloop()
